@@ -60,16 +60,6 @@ jobs:
           draft: false
           prerelease: false
 
-  upload-assets:
-    name: Upload Release Assets
-    runs-on: ubuntu-latest
-    needs: release
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v3
-        with:
-          path: ./build
-
       - name: Upload each file as release asset
         uses: actions/upload-release-asset@v1
         with:
