@@ -7,7 +7,6 @@ on:
 
 jobs:
   build_and_release:
-    name: Build, Create, and Upload Release Assets
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -79,38 +78,11 @@ jobs:
               | jq -r '.upload_url' | sed -e "s/{?name,label}//")
           echo "UPLOAD_URL=${URL}" >> $GITHUB_ENV
 
-      - name: Upload Linux amd64 asset
-        if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
+      - name: Upload Release Asset
+        if: ${{ always() }}
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./build/myapp-linux-amd64
-          asset_name: myapp-linux-amd64
-          asset_content_type: application/octet-stream
-
-      - name: Upload Linux 386 asset
-        if: matrix.goos == 'linux' && matrix.goarch == '386'
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./build/myapp-linux-386
-          asset_name: myapp-linux-386
-          asset_content_type: application/octet-stream
-
-      - name: Upload Windows amd64 asset
-        if: matrix.goos == 'windows' && matrix.goarch == 'amd64'
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./build/myapp-windows-amd64.exe
-          asset_name: myapp-windows-amd64.exe
-          asset_content_type: application/octet-stream
-
-      - name: Upload Windows 386 asset
-        if: matrix.goos == 'windows' && matrix.goarch == '386'
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./build/myapp-windows-386.exe
-          asset_name: myapp-windows-386.exe
+          asset_path: ./build/myapp-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && matrix.goarch == '386' ? '.exe' : '' }}
+          asset_name: myapp-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && matrix.goarch == '386' ? '.exe' : '' }}
           asset_content_type: application/octet-stream
