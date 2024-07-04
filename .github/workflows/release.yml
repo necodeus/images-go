@@ -7,7 +7,7 @@ on:
 
 jobs:
   build_and_release:
-    name: Build and Upload Artifacts
+    name: Build, Create, and Upload Release Assets
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -52,17 +52,14 @@ jobs:
           name: myapp-${{ matrix.goos }}-${{ matrix.goarch }}
           path: ./build/myapp-${{ matrix.goos }}-${{ matrix.goarch }}*
 
-  release:
-    name: Create and Upload Release Assets
-    runs-on: ubuntu-latest
-    needs: build_and_release
-    steps:
       - name: Download all artifacts
+        if: matrix.create_release == 'true'
         uses: actions/download-artifact@v3
         with:
           path: ./build
 
       - name: Create Release
+        if: matrix.create_release == 'true'
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -73,16 +70,17 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Get Latest Release Upload
+      - name: Get Latest Release Upload URL
+        if: matrix.create_release == 'true'
         id: get_upload_url
         run: |
           URL=$(curl -H "Authorization: token ${{ secrets.PAT }}" \
               https://api.github.com/repos/${{ github.repository }}/releases/latest \
-              | jq -r '.upload_url')
+              | jq -r '.upload_url' | sed -e "s/{?name,label}//")
           echo "UPLOAD_URL=${URL}" >> $GITHUB_ENV
 
       - name: Upload Linux amd64 asset
-        if: ${{ always() }}
+        if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ env.UPLOAD_URL }}
@@ -91,7 +89,7 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Upload Linux 386 asset
-        if: ${{ always() }}
+        if: matrix.goos == 'linux' && matrix.goarch == '386'
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ env.UPLOAD_URL }}
@@ -100,7 +98,7 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Upload Windows amd64 asset
-        if: ${{ always() }}
+        if: matrix.goos == 'windows' && matrix.goarch == 'amd64'
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ env.UPLOAD_URL }}
@@ -109,7 +107,7 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Upload Windows 386 asset
-        if: ${{ always() }}
+        if: matrix.goos == 'windows' && matrix.goarch == '386'
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ env.UPLOAD_URL }}
