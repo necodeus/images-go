@@ -26,7 +26,7 @@ jobs:
       - name: Build binary
         run: |
           mkdir -p build
-          go build -o ./build/${{ matrix.goos }}-${{ matrix.goarch }}/images-go
+          go build -o ./build/${{ matrix.goos }}-${{ matrix.goarch }}/myapp
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
@@ -44,8 +44,6 @@ jobs:
     steps:
       - name: Download build artifacts
         uses: actions/download-artifact@v3
-        with:
-          path: ./build
 
       - name: Create Release
         id: create_release
@@ -60,10 +58,12 @@ jobs:
 
       - name: Upload Release Assets
         run: |
-          for file in ./build/*/*; do
-            filename=$(basename $file)
-            curl -s -H "Authorization: token ${{ secrets.PAT }}" \
-              -H "Content-Type: application/octet-stream" \
-              --data-binary @$file \
-              "${{ steps.create_release.outputs.upload_url }}?name=${filename}"
+          for file in build-*; do
+            for binary in $file/*; do
+              filename=$(basename $binary)
+              curl -s -H "Authorization: token ${{ secrets.PAT }}" \
+                -H "Content-Type: application/octet-stream" \
+                --data-binary @$binary \
+                "${{ steps.create_release.outputs.upload_url }}?name=${file}-${filename}"
+            done
           done
