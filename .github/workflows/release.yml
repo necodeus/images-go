@@ -64,8 +64,22 @@ jobs:
         run: |
           for file in ./build/*; do
             filename=$(basename "$file")
-            curl -s -H "Authorization: token ${{ secrets.PAT }}" \
-              -H "Content-Type: application/octet-stream" \
-              --data-binary @"$file" \
-              "${{ steps.create_release.outputs.upload_url }}?name=${filename}"
+            gh_token="${{ secrets.PAT }}"
+            upload_url="${{ steps.create_release.outputs.upload_url }}"
+            echo "::set-output name=asset_path::$file"
+            echo "::set-output name=asset_name::$filename"
+            echo "::set-output name=upload_url::$upload_url"
+            echo "::set-output name=gh_token::$gh_token"
           done
+        id: set_output_vars
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        with:
+          upload_url: ${{ steps.set_output_vars.outputs.upload_url }}
+          asset_path: ${{ steps.set_output_vars.outputs.asset_path }}
+          asset_name: ${{ steps.set_output_vars.outputs.asset_name }}
+          asset_content_type: application/octet-stream
