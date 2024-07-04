@@ -44,26 +44,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Download build artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v3
         with:
-          name: images-linux-amd64
-          path: ./build/images-linux-amd64
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: images-linux-386
-          path: ./build/images-linux-386
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: images-windows-amd64
-          path: ./build/images-windows-amd64.exe
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: images-windows-386
-          path: ./build/images-windows-386.exe
+          path: ./build
 
       - name: Create Release
         id: create_release
@@ -79,6 +63,10 @@ jobs:
       - name: Upload Release Assets
         run: |
           for file in ./build/*; do
+            if [[ $file == *"windows"* ]]; then
+              mv $file $file.exe
+              file="$file.exe"
+            fi
             filename=$(basename $file)
             curl -s -H "Authorization: token ${{ secrets.PAT }}" \
               -H "Content-Type: application/octet-stream" \
