@@ -49,8 +49,12 @@ jobs:
         with:
           path: ./build
 
-      - name: List files for debug
-        run: ls -la ./build
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+          sudo apt-add-repository https://cli.github.com/packages
+          sudo apt update
+          sudo apt install gh
 
       - name: Create Release
         id: create_release
@@ -67,8 +71,7 @@ jobs:
         run: |
           for file in ./build/*; do
             filename=$(basename $file)
-            curl -s -H "Authorization: token ${{ secrets.PAT }}" \
-              -H "Content-Type: application/octet-stream" \
-              --data-binary @$file \
-              "${{ steps.create_release.outputs.upload_url }}?name=${filename}"
+            gh release upload ${{ github.ref_name }} $file --clobber
           done
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
