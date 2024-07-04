@@ -40,7 +40,7 @@ jobs:
           path: ./build/myapp-${{ matrix.goos }}-${{ matrix.goarch }}*
 
   release:
-    name: Create Release and Upload Assets
+    name: Create Release
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -60,20 +60,42 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release Assets
-        run: |
-          for file in ./build/*; do
-            echo "Uploading $file..."
-            gh_token="${{ secrets.PAT }}"
-            upload_url="${{ steps.create_release.outputs.upload_url }}"
-            asset_path="$file"
-            asset_name=$(basename "$file")
-            echo "Asset path: $asset_path"
-            echo "Asset name: $asset_name"
+  set-output:
+    name: Set output for matrix
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./build
 
-            curl -X POST \
-              -H "Authorization: token $gh_token" \
-              -H "Content-Type: application/octet-stream" \
-              --data-binary @"$asset_path" \
-              "$upload_url?name=$asset_name"
-          done
+      - name: List files
+        id: list_files
+        run: |
+          files=$(ls ./build)
+          file_list=$(echo "$files" | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          echo "::set-output name=files::$file_list"
+
+  upload-assets:
+    name: Upload Release Assets
+    runs-on: ubuntu-latest
+    needs: set-output
+    strategy:
+      matrix:
+        file: ${{ fromJSON(needs.set-output.outputs.files) }}
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: ./build
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        with:
+          upload_url: ${{ needs.set-output.outputs.create_release.outputs.upload_url }}
+          asset_path: ./build/${{ matrix.file }}
+          asset_name: ${{ matrix.file }}
+          asset_content_type: application/octet-stream
