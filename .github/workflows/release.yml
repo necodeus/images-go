@@ -6,13 +6,26 @@ on:
       - "v*"
 
 jobs:
-  build:
+  build_and_release:
     name: Build and Upload Artifacts
     runs-on: ubuntu-latest
     strategy:
       matrix:
         goos: [linux, windows]
         goarch: [amd64, 386]
+        include:
+          - goos: linux
+            goarch: amd64
+            create_release: true
+          - goos: linux
+            goarch: 386
+            create_release: false
+          - goos: windows
+            goarch: amd64
+            create_release: false
+          - goos: windows
+            goarch: 386
+            create_release: false
     steps:
       - name: Set up Go
         uses: actions/setup-go@v3
@@ -40,9 +53,9 @@ jobs:
           path: ./build/myapp-${{ matrix.goos }}-${{ matrix.goarch }}*
 
   release:
-    name: Create Release
+    name: Create and Upload Release Assets
     runs-on: ubuntu-latest
-    needs: build
+    needs: build_and_release
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v3
@@ -60,10 +73,34 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload each file as release asset
+      - name: Upload Linux amd64 asset
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/
-          asset_name: ""
+          asset_path: ./build/myapp-linux-amd64
+          asset_name: myapp-linux-amd64
+          asset_content_type: application/octet-stream
+
+      - name: Upload Linux 386 asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/myapp-linux-386
+          asset_name: myapp-linux-386
+          asset_content_type: application/octet-stream
+
+      - name: Upload Windows amd64 asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/myapp-windows-amd64.exe
+          asset_name: myapp-windows-amd64.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload Windows 386 asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/myapp-windows-386.exe
+          asset_name: myapp-windows-386.exe
           asset_content_type: application/octet-stream
