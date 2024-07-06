@@ -8,23 +8,6 @@ on:
 jobs:
   build_and_release:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos: [linux, windows]
-        goarch: [amd64, 386]
-        include:
-          - goos: linux
-            goarch: amd64
-            create_release: true
-          - goos: linux
-            goarch: 386
-            create_release: false
-          - goos: windows
-            goarch: amd64
-            create_release: false
-          - goos: windows
-            goarch: 386
-            create_release: false
     steps:
       - name: Set up Go
         uses: actions/setup-go@v3
@@ -37,28 +20,23 @@ jobs:
       - name: Build binary
         run: |
           mkdir -p build
-          binary_name="myapp-${{ matrix.goos }}-${{ matrix.goarch }}"
-          if [ "${{ matrix.goos }}" == "windows" ]; then
-            binary_name="${binary_name}.exe"
-          fi
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o ./build/${binary_name}
+          binary_name="myapp-windows-amd64.exe"
+          GOOS=windows GOARCH=amd64 go build -o ./build/${binary_name}
         env:
           CGO_ENABLED: 0
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: myapp-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: ./build/myapp-${{ matrix.goos }}-${{ matrix.goarch }}*
+          name: myapp-windows-amd64
+          path: ./build/myapp-windows-amd64.exe
 
       - name: Download all artifacts
-        if: matrix.create_release == 'true'
         uses: actions/download-artifact@v3
         with:
           path: ./build
 
       - name: Create Release
-        if: matrix.create_release == 'true'
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -70,7 +48,6 @@ jobs:
           prerelease: false
 
       - name: Get Latest Release Upload URL
-        if: matrix.create_release == 'true'
         id: get_upload_url
         run: |
           UPLOAD_URL=$(curl -H "Authorization: token ${{ secrets.PAT }}" \
@@ -82,6 +59,6 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ./build/myapp-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' }}
-          asset_name: myapp-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' }}
+          asset_path: ./build/myapp-windows-amd64.exe
+          asset_name: myapp-windows-amd64.exe
           asset_content_type: application/octet-stream
