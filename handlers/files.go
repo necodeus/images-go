@@ -63,11 +63,19 @@ func GetImage(c *gin.Context) {
 	resizedFilePath := fmt.Sprintf("%s_%dx%d", filePath, width, height)
 
 	if _, err := os.Stat(resizedFilePath); os.IsNotExist(err) {
-		fileFormat := strings.Split(image.TypeName, "/")[1]
+		parts := strings.Split(image.TypeName, "/")
+		if len(parts) < 2 {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.File("./errors/500_internal_error.webp")
+			fmt.Println("Invalid image type format:", image.TypeName)
+			return
+		}
+		fileFormat := parts[1]
 
 		if err := utils.GenerateThumbnail(filePath, resizedFilePath+"."+fileFormat, width, height); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
 			c.File("./errors/500_internal_error.webp")
+			fmt.Println("Error generating thumbnail:", err)
 			return
 		}
 	}
