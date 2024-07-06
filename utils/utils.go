@@ -21,12 +21,10 @@ func GenerateThumbnail(srcPath, dstPath string, width, height int) error {
 		return fmt.Errorf("failed to open image: %v", err)
 	}
 
-	scaledImage := imaging.Fit(srcImage, width, height, imaging.Lanczos)
-
-	dstImage := imaging.CropCenter(scaledImage, width, height)
+	// Resize and crop the image to the exact dimensions, centering the cropped area
+	dstImage := imaging.Fill(srcImage, width, height, imaging.Center, imaging.Lanczos)
 
 	err = imaging.Save(dstImage, dstPath)
-
 	if err != nil {
 		return fmt.Errorf("failed to save image: %v", err)
 	}
