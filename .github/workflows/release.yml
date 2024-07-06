@@ -9,50 +9,37 @@ jobs:
   build_and_release:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version: "1.21.12"
 
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Build binary
+      - name: Build for Windows
         run: |
           mkdir -p build
-          binary_name="myapp-windows-amd64.exe"
-          GOOS=windows GOARCH=amd64 go build -o ./build/${binary_name}
-        env:
-          CGO_ENABLED: 0
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o ./build/myapp-windows-amd64.exe
+          cp .env ./build/.env
+          cp -r errors ./build/errors
+          cp init.sql ./build/init.sql
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: myapp-windows-amd64
-          path: ./build/myapp-windows-amd64.exe
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v3
-        with:
-          path: ./build
+      - name: Create tar archive
+        run: |
+          tar -czvf ./build/myapp-windows-amd64.tar.gz -C ./build myapp-windows-amd64.exe .env errors init.sql
 
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-
-      - name: Get Latest Release ID
-        id: get_release_id
         run: |
-          RELEASE_ID=$(curl -H "Authorization: token ${{ secrets.PAT }}" \
-              https://api.github.com/repos/${{ github.repository }}/releases/latest \
-              | jq -r '.id')
+          response=$(curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.PAT }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ github.repository }}/releases \
+            -d "{\"tag_name\": \"${GITHUB_REF_NAME}\", \"name\": \"Release ${GITHUB_REF_NAME}\", \"draft\": false, \"prerelease\": false}")
+          echo "$response"
+          RELEASE_ID=$(echo "$response" | jq -r '.id')
           echo "RELEASE_ID=${RELEASE_ID}" >> $GITHUB_ENV
 
       - name: Upload Release Asset with Curl
@@ -61,5 +48,5 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.PAT }}" \
             -H "Content-Type: application/octet-stream" \
-            --data-binary @./build/myapp-windows-amd64.exe \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets?name=myapp-windows-amd64.exe"
+            --data-binary @./build/myapp-windows-amd64.tar.gz \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets?name=myapp-windows-amd64.tar.gz"
