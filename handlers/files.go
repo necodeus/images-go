@@ -63,7 +63,8 @@ func GetImage(c *gin.Context) {
 	resizedFilePath := fmt.Sprintf("%s_%dx%d", filePath, width, height)
 
 	if _, err := os.Stat(resizedFilePath); os.IsNotExist(err) {
-		fileFormat := strings.Split(image.TypeName, "/")[1]
+		// jest problem z generowaniem miniaturki
+		fileFormat := strings.Split(image.MimeType, "/")[1]
 
 		if err := utils.GenerateThumbnail(filePath, resizedFilePath+"."+fileFormat, width, height); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
