@@ -47,17 +47,19 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Get Latest Release Upload URL
-        id: get_upload_url
+      - name: Get Latest Release ID
+        id: get_release_id
         run: |
-          UPLOAD_URL=$(curl -H "Authorization: token ${{ secrets.PAT }}" \
+          RELEASE_ID=$(curl -H "Authorization: token ${{ secrets.PAT }}" \
               https://api.github.com/repos/${{ github.repository }}/releases/latest \
-              | jq -r '.upload_url' | sed -e "s/{?name,label}//")
-          echo "UPLOAD_URL=${UPLOAD_URL}" >> $GITHUB_ENV
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ env.UPLOAD_URL }}?name=myapp-windows-amd64.exe
-          asset_path: ./build/myapp-windows-amd64.exe
-          asset_name: myapp-windows-amd64.exe
-          asset_content_type: application/octet-stream
+              | jq -r '.id')
+          echo "RELEASE_ID=${RELEASE_ID}" >> $GITHUB_ENV
+
+      - name: Upload Release Asset with Curl
+        run: |
+          curl -L \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.PAT }}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @./build/myapp-windows-amd64.exe \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets?name=myapp-windows-amd64.exe"
