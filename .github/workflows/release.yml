@@ -21,7 +21,7 @@ jobs:
         run: |
           mkdir -p build
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o ./build/myapp-windows-amd64.exe
-          cp .env ./build/.env
+          cp .env.example ./build/.env
           cp -r errors ./build/errors
           cp init.sql ./build/init.sql
 
