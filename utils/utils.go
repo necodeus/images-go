@@ -17,12 +17,13 @@ func GetExtension(filename string) bool {
 
 func GenerateThumbnail(srcPath, dstPath string, width, height int) error {
 	srcImage, err := imaging.Open(srcPath)
-
 	if err != nil {
 		return fmt.Errorf("failed to open image: %v", err)
 	}
 
-	dstImage := imaging.Resize(srcImage, width, height, imaging.Lanczos)
+	scaledImage := imaging.Fit(srcImage, width, height, imaging.Lanczos)
+
+	dstImage := imaging.CropCenter(scaledImage, width, height)
 
 	err = imaging.Save(dstImage, dstPath)
 
@@ -30,7 +31,11 @@ func GenerateThumbnail(srcPath, dstPath string, width, height int) error {
 		return fmt.Errorf("failed to save image: %v", err)
 	}
 
-	os.Rename(dstPath, strings.TrimSuffix(dstPath, filepath.Ext(dstPath)))
+	err = os.Rename(dstPath, strings.TrimSuffix(dstPath, filepath.Ext(dstPath)))
+
+	if err != nil {
+		return fmt.Errorf("failed to rename image: %v", err)
+	}
 
 	return nil
 }
