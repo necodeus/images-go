@@ -48,6 +48,8 @@ jobs:
           ci/./archive.sh "${{ matrix.os }}" "${{ matrix.arch }}"
 
       - name: upload
+        env:
+          RELEASE_ID: ${{ steps.cr.outputs.release_id }}
         run: |
           chmod +x ci/upload.sh
           echo "PAT: ${{ secrets.PAT }}"
