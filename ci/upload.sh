@@ -11,4 +11,4 @@ curl -L \
     -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/octet-stream" \
     --data-binary @./build/images-${OS}-${ARCH}.tar.gz \
-    "https://uploads.github.com/repos/${REPO_NAME}/releases/${RELEASE_ID}/assets?name=images-${OS}-${ARCH}.tar.gz"
+    "https://uploads.github.com/repos/${REPO_NAME}/releases/${RELEASE_ID}/assets?name=images-${TAG_NAME}-${OS}-${ARCH}.tar.gz"
