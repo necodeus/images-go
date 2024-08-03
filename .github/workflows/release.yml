@@ -13,7 +13,7 @@ jobs:
       rid: ${{ steps.cr.outputs.release_id }}
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: create release
         id: cr
@@ -31,7 +31,7 @@ jobs:
         arch: [amd64, arm64]
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: setup go
         uses: actions/setup-go@v3
