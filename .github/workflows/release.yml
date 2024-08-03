@@ -8,6 +8,7 @@ on:
 jobs:
   create_release:
     runs-on: ubuntu-latest
+    # https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#jobsjob_idoutputs
     outputs:
       rid: ${{ steps.cr.outputs.release_id }}
     steps:
@@ -29,9 +30,6 @@ jobs:
         os: [linux, windows, darwin]
         arch: [amd64, arm64]
     steps:
-      - env:
-          RELEASE_ID: ${{needs.create_release.outputs.rid}}
-
       - name: checkout
         uses: actions/checkout@v2
 
@@ -51,6 +49,8 @@ jobs:
           ci/./archive.sh "${{ matrix.os }}" "${{ matrix.arch }}"
 
       - name: upload
+        env:
+          RELEASE_ID: ${{needs.create_release.outputs.rid}}
         run: |
           chmod +x ci/upload.sh
           echo "PAT: ${{ secrets.PAT }}"
