@@ -18,7 +18,7 @@ release_id=$(echo "$response" | jq -r '.id')
 
 echo "RELEASE_ID=${release_id}"
 
-if [ -z "$release_id" ]; then
+if [ "$release_id" == "null" ]; then
     echo "Release already exists, fetching release id..."
 
     response=$(curl -L -H "Accept: application/vnd.github+json" https://api.github.com/repos/${REPO_NAME}/releases/tags/${TAG_NAME})
