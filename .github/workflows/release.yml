@@ -17,9 +17,11 @@ jobs:
         run: |
           chmod +x ci/create_release.sh
           ci/./create_release.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ github.ref_name }}
-          echo $(cat release_id) >> $GITHUB_ENV
+          echo ::set-output name=release_id::$(cat release_id)
 
   build_and_upload:
+    env:
+      RELEASE_ID: ${{ steps.create_release.outputs.release_id }}
     needs: create_release
     runs-on: ubuntu-latest
     strategy:
