@@ -14,4 +14,4 @@ response=$(curl -L \
 
 release_id=$(echo "$response" | jq -r '.id')
 
-echo "::set-output name=RELEASE_ID::$release_id"
+echo "::set-output name=release_id::$release_id"
