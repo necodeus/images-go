@@ -17,7 +17,6 @@ jobs:
         run: |
           chmod +x ci/create_release.sh
           ci/./create_release.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ github.ref_name }}"
-          echo "::set-output name=release_id::$(cat release_id)"
 
   build_and_upload:
     needs: create_release
@@ -46,15 +45,12 @@ jobs:
           ci/./archive.sh "${{ matrix.os }}" "${{ matrix.arch }}"
 
       - name: upload
-        env:
-          RELEASE_ID: ${{ steps.cr.outputs.release_id }}
         run: |
+          release_id=$(cat release_id)
           chmod +x ci/upload.sh
           echo "PAT: ${{ secrets.PAT }}"
           echo "REPO: ${{ github.repository }}"
-          echo "RELEASE_ID: ${{ steps.cr.outputs.release_id }}"
-          echo "RELEASE_ID: ${{ env.release_id }}"
-          echo "RELEASE_ID: ${{ env.RELEASE_ID }}"
+          echo "RELEASE_ID: ${{ release_id }}"
           echo "OS: ${{ matrix.os }}"
           echo "ARCH: ${{ matrix.arch }}"
-          ci/./upload.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ steps.cr.outputs.release_id }}" "${{ matrix.os }}" "${{ matrix.arch }}"
+          ci/./upload.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ release_id }}" "${{ matrix.os }}" "${{ matrix.arch }}"
