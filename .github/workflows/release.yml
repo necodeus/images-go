@@ -47,9 +47,7 @@ jobs:
 
       - name: upload
         run: |
-          echo ${{ steps }} # Object
-          echo ${{ steps.cr }} # Object
-          echo ${{ steps.cr.outputs }}
+          echo ${{ steps | tojson }}
           chmod +x ci/upload.sh
           echo "PAT: ${{ secrets.PAT }}"
           echo "REPO: ${{ github.repository }}"
