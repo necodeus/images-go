@@ -1,6 +1,6 @@
 # Image (Go)
 
-[![Release](https://github.com/necodeus/images-go/actions/workflows/release.yml/badge.svg?branch=production)](https://github.com/necodeus/images-go/actions/workflows/release.yml)
+[![Release](https://github.com/necodeus/images-go/actions/workflows/release.yml/badge.svg)](https://github.com/necodeus/images-go/actions/workflows/release.yml)
 
 ## Development
 
