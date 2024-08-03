@@ -47,6 +47,7 @@ jobs:
 
       - name: upload
         run: |
+          echo ${{ steps }}
           chmod +x ci/upload.sh
           echo "PAT: ${{ secrets.PAT }}"
           echo "REPO: ${{ github.repository }}"

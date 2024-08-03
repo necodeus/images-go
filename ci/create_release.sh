@@ -20,4 +20,5 @@ if [ "$release_id" == "null" ]; then
     release_id=$(echo "$response" | jq -r '.id')
 fi
 
+echo "Release ID: ${release_id}"
 echo "${release_id}" > release_id
