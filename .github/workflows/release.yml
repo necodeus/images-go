@@ -18,10 +18,7 @@ jobs:
           chmod +x ci/create_release.sh
           ci/./create_release.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ github.ref_name }}"
           echo "::set-output name=release_id::$(cat release_id)"
-        shell: bash
-
-      - name: get release id
-        run: echo "release_id=$(cat release_id)" >> $GITHUB_ENV
+          echo "release_id=$(cat release_id)" >> $GITHUB_ENV
 
   build_and_upload:
     needs: create_release
