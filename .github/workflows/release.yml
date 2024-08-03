@@ -17,11 +17,10 @@ jobs:
         run: |
           chmod +x ci/create_release.sh
           ci/./create_release.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ github.ref_name }}
-          echo ::set-output name=release_id::$(cat release_id)
+          RELEASE_ID=$(cat release_id)
+          echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_ENV
 
   build_and_upload:
-    env:
-      RELEASE_ID: ${{ steps.create_release.outputs.release_id }}
     needs: create_release
     runs-on: ubuntu-latest
     strategy:
@@ -52,7 +51,7 @@ jobs:
           chmod +x ci/upload.sh
           echo PAT: ${{ secrets.PAT }}
           echo REPO: ${{ github.repository }}
-          echo RELEASE_ID: ${{ env.RELEASE_ID }}
+          echo RELEASE_ID: ${{ env.RELEASE_ID }} # empty
           echo OS: ${{ matrix.os }}
           echo ARCH: ${{ matrix.arch }}
           ci/./upload.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ env.RELEASE_ID }} ${{ matrix.os }} ${{ matrix.arch }}
