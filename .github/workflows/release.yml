@@ -58,4 +58,4 @@ jobs:
           echo "RELEASE_ID: ${{ env.RELEASE_ID }}"
           echo "OS: ${{ matrix.os }}"
           echo "ARCH: ${{ matrix.arch }}"
-          ci/./upload.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ env.RELEASE_ID }}" "${{ matrix.os }}" "${{ matrix.arch }}"
+          ci/./upload.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ env.RELEASE_ID }}" "${{ matrix.os }}" "${{ matrix.arch }}" "${{ github.ref_name }}"
