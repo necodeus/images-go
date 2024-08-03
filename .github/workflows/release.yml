@@ -18,7 +18,10 @@ jobs:
           chmod +x ci/create_release.sh
           ci/./create_release.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ github.ref_name }}"
           echo "::set-output name=release_id::$(cat release_id)"
-          echo "release_id: $(cat release_id)"
+        shell: bash
+
+      - name: get release id
+        run: echo "release_id=$(cat release_id)" >> $GITHUB_ENV
 
   build_and_upload:
     needs: create_release
@@ -48,15 +51,13 @@ jobs:
 
       - name: upload
         env:
-          RELEASE_ID: ${{ needs.create_release.outputs.release_id }}
+          RELEASE_ID: ${{ env.release_id }}
         run: |
           chmod +x ci/upload.sh
           echo "PAT: ${{ secrets.PAT }}"
           echo "REPO: ${{ github.repository }}"
           echo "RELEASE_ID: ${{ env.RELEASE_ID }}"
-          echo "RELEASE_ID: ${{ needs.create_release.outputs.release_id }}"
-          echo "RELEASE_ID: ${{ needs.create_release.outputs.RELEASE_ID }}"
-          echo "RELEASE_ID: ${{ toJson(needs.create_release.outputs) }}"
           echo "OS: ${{ matrix.os }}"
           echo "ARCH: ${{ matrix.arch }}"
           ci/./upload.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ env.RELEASE_ID }}" "${{ matrix.os }}" "${{ matrix.arch }}"
+        shell: bash
