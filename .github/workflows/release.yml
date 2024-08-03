@@ -17,6 +17,7 @@ jobs:
       - name: create release
         id: create_release
         run: |
+          cd ./ci
           chmod +x create_release.sh
           ./create_release.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ github.ref_name }}
 
