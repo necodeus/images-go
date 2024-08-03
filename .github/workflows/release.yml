@@ -14,8 +14,8 @@ jobs:
       - name: create release
         id: create_release
         run: |
-          chmod +x ./create_release.sh
-          ./create_release.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ GITHUB_REF_NAME }}
+          chmod +x .github/scripts/./create_release.sh
+          .github/scripts/./create_release.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ GITHUB_REF_NAME }}
 
   build_and_upload:
     needs: create_release
