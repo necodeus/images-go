@@ -14,7 +14,7 @@ jobs:
       - name: create release
         id: create_release
         run: |
-          cd ci
+          cd ./ci
           chmod +x create_release.sh
           ./create_release.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ github.ref_name }}
 
@@ -33,13 +33,13 @@ jobs:
 
       - name: build
         run: |
-          cd ci
+          cd ./ci
           chmod +x ./build.sh
           ./build.sh ${{ matrix.os }} ${{ matrix.arch }}
 
       - name: archive
         run: |
-          cd ci
+          cd ./ci
           chmod +x ./archive.sh
           ./archive.sh ${{ matrix.os }} ${{ matrix.arch }}
 
@@ -47,6 +47,6 @@ jobs:
         env:
           RELEASE_ID: ${{ needs.create_release.outputs.release_id }}
         run: |
-          cd ci
+          cd ./ci
           chmod +x ./upload.sh
           ./upload.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ env.RELEASE_ID }} ${{ matrix.os }} ${{ matrix.arch }}
