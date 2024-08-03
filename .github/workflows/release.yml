@@ -8,16 +8,18 @@ on:
 jobs:
   create_release:
     runs-on: ubuntu-latest
+    outputs:
+      rid: ${{ steps.cr.outputs.release_id }}
     steps:
       - name: checkout
         uses: actions/checkout@v2
 
       - name: create release
-        id: create-release
+        id: cr
         run: |
           chmod +x ci/create_release.sh
           ci/./create_release.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ github.ref_name }}"
-          echo "RELEASE_ID=$(cat release_id)" >> "$GITHUB_OUTPUT"
+          echo "release_id=$(cat release_id)" >> "$GITHUB_OUTPUT"
 
   build_and_upload:
     needs: create_release
@@ -27,6 +29,9 @@ jobs:
         os: [linux, windows, darwin]
         arch: [amd64, arm64]
     steps:
+      - env:
+          RELEASE_ID: ${{needs.create_release.outputs.rid}}
+
       - name: checkout
         uses: actions/checkout@v2
 
@@ -46,8 +51,6 @@ jobs:
           ci/./archive.sh "${{ matrix.os }}" "${{ matrix.arch }}"
 
       - name: upload
-        env:
-          RELEASE_ID: ${{ steps.create-release.outputs.RELEASE_ID }}
         run: |
           chmod +x ci/upload.sh
           echo "PAT: ${{ secrets.PAT }}"
