@@ -17,7 +17,7 @@ jobs:
         run: |
           chmod +x ci/create_release.sh
           ci/./create_release.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ github.ref_name }}
-          echo ${{ env.RELEASE_ID }}
+          echo RELEASE_ID=$RELEASE_ID >> $GITHUB_ENV
 
   build_and_upload:
     needs: create_release
