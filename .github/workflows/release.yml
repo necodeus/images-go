@@ -48,11 +48,13 @@ jobs:
           ci/./archive.sh "${{ matrix.os }}" "${{ matrix.arch }}"
 
       - name: upload
+        env:
+          RELEASE_ID: ${{ needs.create_release.outputs.release_id }}
         run: |
           chmod +x ci/upload.sh
           echo "PAT: ${{ secrets.PAT }}"
           echo "REPO: ${{ github.repository }}"
-          echo "RELEASE_ID: ${{ needs.create_release.outputs.release_id }}"
+          echo "RELEASE_ID: ${{ env.RELEASE_ID }}"
           echo "OS: ${{ matrix.os }}"
           echo "ARCH: ${{ matrix.arch }}"
-          ci/./upload.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ needs.create_release.outputs.release_id }}" "${{ matrix.os }}" "${{ matrix.arch }}"
+          ci/./upload.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ env.RELEASE_ID }}" "${{ matrix.os }}" "${{ matrix.arch }}"
