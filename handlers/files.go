@@ -22,11 +22,10 @@ func GetImage(c *gin.Context) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.Writer.WriteHeader(http.StatusNotFound)
-			c.File("./errors/404_not_found.webp")
 		} else {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
-			c.File("./errors/500_internal_error.webp")
 		}
+		c.File("./dot.gif")
 		return
 	}
 
@@ -41,8 +40,8 @@ func GetImage(c *gin.Context) {
 	width, height, err := utils.ParseResolution(resolution)
 
 	if err != nil {
-		c.Writer.WriteHeader(http.StatusBadRequest)
-		c.File("./errors/400_invalid_resolution.webp")
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.File("./dot.gif")
 		return
 	}
 
@@ -50,13 +49,13 @@ func GetImage(c *gin.Context) {
 
 	if err != nil {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
-		c.File("./errors/500_internal_error.webp")
+		c.File("./dot.gif")
 		return
 	}
 
 	if !utils.IsValidResolution(imageType.AvailableResolutions, width, height) {
-		c.Writer.WriteHeader(http.StatusBadRequest)
-		c.File("./errors/400_invalid_resolution.webp")
+		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.File("./dot.gif")
 		return
 	}
 
@@ -68,7 +67,7 @@ func GetImage(c *gin.Context) {
 
 		if err := utils.GenerateThumbnail(filePath, resizedFilePath+"."+fileFormat, width, height); err != nil {
 			c.Writer.WriteHeader(http.StatusInternalServerError)
-			c.File("./errors/500_internal_error.webp")
+			c.File("./dot.gif")
 			return
 		}
 	}
