@@ -17,40 +17,40 @@ jobs:
         run: |
           chmod +x ci/create_release.sh
           ci/./create_release.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ github.ref_name }}
-          echo $(cat release_id)
+          echo $(cat release_id) >> $GITHUB_ENV
 
-  # build_and_upload:
-  #   needs: create_release
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       os: [linux, windows, darwin]
-  #       arch: [amd64, arm64]
-  #   steps:
-  #     - name: checkout
-  #       uses: actions/checkout@v2
+  build_and_upload:
+    needs: create_release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [linux, windows, darwin]
+        arch: [amd64, arm64]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
 
-  #     - name: setup go
-  #       uses: actions/setup-go@v3
-  #       with:
-  #         go-version: "1.21.12"
+      - name: setup go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.21.12"
 
-  #     - name: build
-  #       run: |
-  #         chmod +x ci/build.sh
-  #         ci/./build.sh ${{ matrix.os }} ${{ matrix.arch }}
+      - name: build
+        run: |
+          chmod +x ci/build.sh
+          ci/./build.sh ${{ matrix.os }} ${{ matrix.arch }}
 
-  #     - name: archive
-  #       run: |
-  #         chmod +x ci/archive.sh
-  #         ci/./archive.sh ${{ matrix.os }} ${{ matrix.arch }}
+      - name: archive
+        run: |
+          chmod +x ci/archive.sh
+          ci/./archive.sh ${{ matrix.os }} ${{ matrix.arch }}
 
-  #     - name: upload
-  #       run: |
-  #         chmod +x ci/upload.sh
-  #         echo PAT: ${{ secrets.PAT }}
-  #         echo REPO: ${{ github.repository }}
-  #         echo RELEASE_ID: ${{ env.RELEASE_ID }}
-  #         echo OS: ${{ matrix.os }}
-  #         echo ARCH: ${{ matrix.arch }}
-  #         ci/./upload.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ env.RELEASE_ID }} ${{ matrix.os }} ${{ matrix.arch }}
+      - name: upload
+        run: |
+          chmod +x ci/upload.sh
+          echo PAT: ${{ secrets.PAT }}
+          echo REPO: ${{ github.repository }}
+          echo RELEASE_ID: ${{ env.RELEASE_ID }}
+          echo OS: ${{ matrix.os }}
+          echo ARCH: ${{ matrix.arch }}
+          ci/./upload.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ env.RELEASE_ID }} ${{ matrix.os }} ${{ matrix.arch }}
