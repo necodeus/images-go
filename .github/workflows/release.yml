@@ -11,10 +11,12 @@ jobs:
     outputs:
       release_id: ${{ steps.create_release.outputs.release_id }}
     steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
       - name: create release
         id: create_release
         run: |
-          cd ./ci
           chmod +x create_release.sh
           ./create_release.sh ${{ secrets.PAT }} ${{ github.repository }} ${{ github.ref_name }}
 
@@ -26,6 +28,9 @@ jobs:
         os: [linux, windows, darwin]
         arch: [amd64, arm64]
     steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
       - name: setup go
         uses: actions/setup-go@v3
         with:
