@@ -46,11 +46,10 @@ jobs:
 
       - name: upload
         run: |
-          release_id=$(cat release_id)
           chmod +x ci/upload.sh
           echo "PAT: ${{ secrets.PAT }}"
           echo "REPO: ${{ github.repository }}"
-          echo "RELEASE_ID: ${{ release_id }}"
+          echo "RELEASE_ID: $(cat release_id)"
           echo "OS: ${{ matrix.os }}"
           echo "ARCH: ${{ matrix.arch }}"
-          ci/./upload.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ release_id }}" "${{ matrix.os }}" "${{ matrix.arch }}"
+          ci/./upload.sh "${{ secrets.PAT }}" "${{ github.repository }}" "$(cat release_id)" "${{ matrix.os }}" "${{ matrix.arch }}"
