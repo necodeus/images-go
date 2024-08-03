@@ -13,10 +13,11 @@ jobs:
         uses: actions/checkout@v2
 
       - name: create release
-        id: cr
+        id: create-release
         run: |
           chmod +x ci/create_release.sh
           ci/./create_release.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ github.ref_name }}"
+          echo "RELEASE_ID=$(cat release_id)" >> "$GITHUB_OUTPUT"
 
   build_and_upload:
     needs: create_release
@@ -45,11 +46,13 @@ jobs:
           ci/./archive.sh "${{ matrix.os }}" "${{ matrix.arch }}"
 
       - name: upload
+        env:
+          RELEASE_ID: ${{ steps.create-release.outputs.RELEASE_ID }}
         run: |
           chmod +x ci/upload.sh
           echo "PAT: ${{ secrets.PAT }}"
           echo "REPO: ${{ github.repository }}"
-          echo "RELEASE_ID: $(cat release_id)"
+          echo "RELEASE_ID: ${{ env.RELEASE_ID }}"
           echo "OS: ${{ matrix.os }}"
           echo "ARCH: ${{ matrix.arch }}"
-          ci/./upload.sh "${{ secrets.PAT }}" "${{ github.repository }}" "$(cat release_id)" "${{ matrix.os }}" "${{ matrix.arch }}"
+          ci/./upload.sh "${{ secrets.PAT }}" "${{ github.repository }}" "${{ env.RELEASE_ID }}" "${{ matrix.os }}" "${{ matrix.arch }}"
