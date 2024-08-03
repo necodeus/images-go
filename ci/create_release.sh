@@ -12,6 +12,8 @@ response=$(curl -L \
     https://api.github.com/repos/${REPO_NAME}/releases \
     -d "{\"tag_name\": \"${TAG_NAME}\", \"name\": \"Release ${TAG_NAME}\", \"draft\": false, \"prerelease\": false}")
 
+echo "$response"
+
 release_id=$(echo "$response" | jq -r '.id')
 
 echo "RELEASE_ID=${release_id}" > release_id
