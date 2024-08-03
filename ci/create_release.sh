@@ -12,10 +12,22 @@ response=$(curl -L \
     https://api.github.com/repos/${REPO_NAME}/releases \
     -d "{\"tag_name\": \"${TAG_NAME}\", \"name\": \"Release ${TAG_NAME}\", \"draft\": false, \"prerelease\": false}")
 
+echo "$response"
+
 release_id=$(echo "$response" | jq -r '.id')
 
+echo "RELEASE_ID=${release_id}"
+
 if [ -z "$release_id" ]; then
-    release_id=$(curl -L -H "Accept: application/vnd.github+json" https://api.github.com/repos/${REPO_NAME}/releases/tags/${TAG_NAME} | jq -r '.id')
+    echo "Release already exists, fetching release id..."
+
+    response=$(curl -L -H "Accept: application/vnd.github+json" https://api.github.com/repos/${REPO_NAME}/releases/tags/${TAG_NAME})
+
+    echo "$response"
+
+    release_id=$(echo "$response" | jq -r '.id')
+
+    echo "RELEASE_ID=${release_id}"
 fi
 
 echo "RELEASE_ID=${release_id}" > release_id
