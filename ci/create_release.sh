@@ -14,4 +14,4 @@ response=$(curl -L \
 
 release_id=$(echo "$response" | jq -r '.id')
 
-echo "RELEASE_ID=${release_id}" >> $GITHUB_ENV
+echo "RELEASE_ID=${release_id}" > release_id
