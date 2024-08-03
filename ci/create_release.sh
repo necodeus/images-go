@@ -10,7 +10,7 @@ response=$(curl -L \
     -H "Authorization: Bearer ${TOKEN}" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
     https://api.github.com/repos/${REPO_NAME}/releases \
-    -d "{\"tag_name\": \"${TAG_NAME}\", \"name\": \"Release ${TAG_NAME}\", \"draft\": false, \"prerelease\": false}")
+    -d "{\"tag_name\": \"${TAG_NAME}\", \"name\": \"${TAG_NAME}\", \"draft\": false, \"prerelease\": false}")
 
 release_id=$(echo "$response" | jq -r '.id')
 
@@ -20,5 +20,4 @@ if [ "$release_id" == "null" ]; then
     release_id=$(echo "$response" | jq -r '.id')
 fi
 
-echo "Release ID: ${release_id}"
 echo "${release_id}" > release_id
